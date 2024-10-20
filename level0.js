@@ -27,7 +27,8 @@ window.addEventListener('load', () => { // Why 'load' is used, not 'DOMContentLo
     });
 
     btnClose.addEventListener('click', event => {
-        comm.postToChilds({ cmd: 'must-close' });
+        let cfg_mask = [...document.querySelectorAll('input[name="descend"]:checked')].reduce((prev, next) => { prev += 1 << +next.value; return prev }, 0);
+        comm.closeDescendants({ cfg_mask });
         event.preventDefault();
     });
 

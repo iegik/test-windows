@@ -53,12 +53,15 @@ export function CreateService(options, callback) {
         userHeader.textContent = `Пользователь: ${user.name}, роль: ${user.role}, авторизован до ${user.exp_dt.toLocaleString()}`;
         state.user = user;
     }
-    // parent post 'count-childs'
-    function countChilds(payload) {
+    function isAccepted(payload) {
         const { cfg_mask } = payload;
         const { cfg } = options;
 
-        const accepted = cfg_mask | 1 << cfg === cfg_mask;
+        return cfg < 0 ? false : (cfg_mask | 1 << cfg) === cfg_mask;
+    }
+    // parent post 'count-childs'
+    function countChilds(payload) {
+        const accepted = isAccepted(payload)
         if (!accepted) {
              if (window.opener && !window.opener.closed) {
                 window.opener.postMessage({ cmd: 'counted-child', payload: { count: 0 } });
@@ -93,10 +96,8 @@ export function CreateService(options, callback) {
     }
 
     function closeChilds(payload) {
-        const { cfg_mask } = payload;
         const { cfg } = options;
-
-        const accepted = cfg_mask | 1 << cfg === cfg_mask;
+        const accepted = isAccepted(payload);
         console.log(`CloseChilds called with cfg: ${cfg}, accepted: ${accepted}`);
         if (!accepted) return;
 
@@ -174,6 +175,9 @@ export function CreateService(options, callback) {
         },
         countDescendants(payload) {
             countChilds(payload);
+        },
+        closeDescendants(payload) {
+            this.postToChilds({ cmd: 'close-childs', payload });
         }
     }
 };
