@@ -1,6 +1,6 @@
 import { CreateService } from './common.js';
 
-window.addEventListener('load', () => {
+window.addEventListener('load', () => { // Why 'load' is used, not 'DOMContentLoaded' event?
     const options = { cfg: -1 };
     const comm = CreateService(options, response => {
         console.log('Response:', response);
@@ -19,9 +19,9 @@ window.addEventListener('load', () => {
 
     btnCount.addEventListener('click', event => {
         // TODO: рассчитайте маску выбранных конфигураций, например, для комбинации
-        // (Конфигурация 0 | Конфигурация 1 | Конфигурация 2) получим cfg_mask = 7 = (1 << 0 | 1 << 1 | 1 << 2) 
+        // (Конфигурация 0 | Конфигурация 1 | Конфигурация 2) получим cfg_mask = 7 = (1 << 0 | 1 << 1 | 1 << 2)
         // Рассчитайте cfg_mask
-        let cfg_mask = 7;
+        let cfg_mask = [...document.querySelectorAll('input[name="descend"]:checked')].reduce((prev, next) => { prev += 1 << +next.value; return prev }, 0);
         comm.countDescendants({ cfg_mask });
         event.preventDefault();
     });

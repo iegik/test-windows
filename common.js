@@ -13,7 +13,7 @@ export function CreateService(options, callback) {
         const user = { name, role, exp_dt: new Date(expired) };
         console.log('logged-in:', user);
         // user changed
-        if (state.user && state.user.name !== user.name) {            
+        if (state.user && state.user.name !== user.name) {
             setTimeout(mustClose, 0, user);
         } else {
             setTimeout(userAuthed, 0, user);
@@ -57,10 +57,9 @@ export function CreateService(options, callback) {
     function countChilds(payload) {
         const { cfg_mask } = payload;
         const { cfg } = options;
-        // TODO: count cfg descendants only
 
-        const accepted = true;
-        if (!accepted) { 
+        const accepted = cfg_mask | 1 << cfg === cfg_mask;
+        if (!accepted) {
              if (window.opener && !window.opener.closed) {
                 window.opener.postMessage({ cmd: 'counted-child', payload: { count: 0 } });
             }
@@ -87,7 +86,7 @@ export function CreateService(options, callback) {
         state.copened -= 1;
         if (state.copened === 0) {
             if (window.opener && !window.opener.closed) {
-                window.opener.postMessage({ cmd: 'counted-child', payload: { count: 1 + state.counter } });            
+                window.opener.postMessage({ cmd: 'counted-child', payload: { count: 1 + state.counter } });
             }
             callback({ type: 'descendants-count', value: state.counter });
         }
@@ -97,7 +96,7 @@ export function CreateService(options, callback) {
         const { cfg_mask } = payload;
         const { cfg } = options;
 
-        const accepted = true;
+        const accepted = cfg_mask | 1 << cfg === cfg_mask;
         console.log(`CloseChilds called with cfg: ${cfg}, accepted: ${accepted}`);
         if (!accepted) return;
 
@@ -110,7 +109,7 @@ export function CreateService(options, callback) {
     }
     // windows communication messages
     window.addEventListener('message', event => {
-        const { cmd, payload } = event.data;
+        const { cmd, payload } = event.data; // Why not checked the origin? (security)
         switch (cmd) {
             // posted by login
             case 'logged-in':
@@ -161,7 +160,7 @@ export function CreateService(options, callback) {
     return {
         showLogin(defname='some', defrole='user') {
             const login = window.open('./login.html', 'login');
-            setTimeout(() => login.postMessage({ cmd: 'def-user', payload: { name: defname, role: defrole } }), 200);        
+            setTimeout(() => login.postMessage({ cmd: 'def-user', payload: { name: defname, role: defrole } }), 200);
         },
         postToOpener(message) {
             if (window.opener && !window.opener.closed) {
